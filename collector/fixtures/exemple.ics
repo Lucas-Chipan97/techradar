@@ -1,0 +1,33 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Exemple//FR
+BEGIN:VEVENT
+UID:exemple-1@test
+DTSTART:20261112T170000Z
+DTEND:20261112T193000Z
+SUMMARY:Meetup Data Engineering : dbt et Databricks en production
+DESCRIPTION:Deux talks sur la qualité de données avec dbt\, puis networking. Entrée gratuite.
+LOCATION:Station F\, 5 Parvis Alan Turing\, 75013 Paris
+URL:https://exemple.fr/evenements/data-dbt
+ORGANIZER;CN="Paris Data Community":mailto:contact@exemple.fr
+END:VEVENT
+BEGIN:VEVENT
+UID:exemple-2@test
+DTSTART:20261120T113000Z
+DTEND:20261120T123000Z
+SUMMARY:Webinaire : sécuriser Kubernetes avec une approche Zero Trust
+DESCRIPTION:Session en ligne sur Zoom.
+LOCATION:https://zoom.us/j/123
+END:VEVENT
+BEGIN:VEVENT
+UID:exemple-3@test
+DTSTART:20261125T180000Z
+SUMMARY:Cours de yoga du jeudi
+LOCATION:Lyon
+END:VEVENT
+BEGIN:VEVENT
+UID:exemple-4@test
+DTSTART:20200101T180000Z
+SUMMARY:Ancien meetup Python
+END:VEVENT
+END:VCALENDAR

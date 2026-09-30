@@ -26,6 +26,33 @@ de `src/data/sample-events.ts`.
 La clé `anon` ne peut que **lire** la table `events` (règle RLS dans le schéma).
 La clé `service_role` sert uniquement aux scripts de collecte : ne la mets jamais dans le front ni sur GitHub.
 
+## Remplir la base avec de vrais événements (collecteur Python)
+
+Le dossier `collector/` récupère des événements depuis des **flux iCal** et des **pages contenant des données
+Schema.org « Event »**, les classe (catégorie, ville, technologies, gratuit ou non) et les enregistre dans Supabase.
+
+```bash
+cd collector
+python -m venv .venv
+source .venv/Scripts/activate      # Git Bash sous Windows (macOS/Linux : source .venv/bin/activate)
+pip install -r requirements.txt
+cp .env.example .env               # puis colle ta clé secrète Supabase dedans
+python collect.py --dry-run        # essai à blanc avec les fichiers d'exemple
+python collect.py                  # écrit dans Supabase
+```
+
+Ajoute tes sources dans `collector/sources.yaml`, teste chacune avec
+`python collect.py --dry-run --only "Nom"`, puis lance la collecte réelle.
+Quand tes vraies données sont en place, supprime les événements de démonstration dans le SQL Editor :
+
+```sql
+delete from public.events where canonical_url like 'https://example.com/%';
+```
+
+Le fichier `.github/workflows/collect.yml` lance la collecte chaque jour sur GitHub Actions
+(secrets `SUPABASE_URL` et `SUPABASE_SECRET_KEY` à ajouter dans les réglages du dépôt).
+Une collecte quotidienne évite aussi la mise en pause du projet Supabase gratuit.
+
 ## Déployer sur Hostinger
 
 1. Pousse le projet sur GitHub (`.env.local` est ignoré par Git).
@@ -60,6 +87,8 @@ techradar/
 │   │   ├── ics.ts                   # génération du fichier calendrier
 │   │   └── types.ts
 │   └── data/sample-events.ts        # événements fictifs de démonstration
+├── collector/                       # collecte Python : sources.yaml, parseurs iCal/JSON-LD, classification
+├── .github/workflows/collect.yml    # collecte quotidienne automatique
 ├── supabase/
 │   ├── schema.sql                   # events, source_registry, event_sources, RLS, recherche FTS
 │   └── seed.sql                     # mêmes événements d'exemple, pour la base
@@ -78,7 +107,6 @@ techradar/
 
 ## Étapes suivantes
 
-- Premiers connecteurs Python (JSON-LD, iCal) lancés par GitHub Actions en cron, qui écrivent dans Supabase
-  avec la clé `service_role`.
+- Détection des doublons entre sources (score titre + date + ville + organisateur).
 - Comptes et favoris avec Supabase Auth.
 - Carte des événements (latitude/longitude déjà prévues dans le schéma).

@@ -11,7 +11,8 @@ create extension if not exists pgcrypto;
 create table if not exists public.source_registry (
   source_id          uuid primary key default gen_random_uuid(),
   name               text not null,
-  domain             text not null unique,
+  url                text not null unique,
+  domain             text not null,
   source_type        text not null check (source_type in ('marketplace','organizer','community','institution')),
   collection_method  text not null check (collection_method in ('api','html','rss','ical','jsonld')),
   scope              text not null default 'national' check (scope in ('national','regional','city','organizer')),
@@ -96,12 +97,12 @@ create table if not exists public.event_sources (
   id               uuid primary key default gen_random_uuid(),
   event_id         uuid not null references public.events(id) on delete cascade,
   source_id        uuid not null references public.source_registry(source_id),
-  source_event_id  text,
+  source_event_id  text not null,          -- UID iCal ou URL de la page
   source_url       text not null,
   collected_at     timestamptz not null default now(),
   last_seen_at     timestamptz not null default now(),
   raw_hash         text,
-  unique (source_id, source_url)
+  unique (source_id, source_event_id)
 );
 
 create index if not exists event_sources_event_idx on public.event_sources (event_id);
@@ -131,3 +132,11 @@ alter table public.event_sources   enable row level security;
 drop policy if exists "Lecture publique des événements" on public.events;
 create policy "Lecture publique des événements" on public.events
   for select to anon, authenticated using (true);
+
+-- Droits explicites (utile si l'exposition automatique des tables est désactivée)
+grant usage on schema public to anon, authenticated, service_role;
+grant select on public.events to anon, authenticated;
+grant all on public.events, public.source_registry, public.event_sources to service_role;
+
+-- Recharge le cache de l'API pour qu'elle voie les nouvelles tables tout de suite
+notify pgrst, 'reload schema';

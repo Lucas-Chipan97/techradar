@@ -17,3 +17,8 @@ npm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+
+# collecteur Python
+.venv/
+__pycache__/
+*.pyc

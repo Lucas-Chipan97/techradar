@@ -1,0 +1,37 @@
+# ---------------------------------------------------------------------------
+# Registre des sources de TechRadar.
+#
+# method : ical   -> flux de calendrier (.ics), le plus fiable
+#          jsonld -> page web qui contient des données Schema.org « Event »
+#
+# Avant d'activer une source réelle :
+#   1. vérifie ses conditions d'utilisation (le robots.txt est vérifié automatiquement) ;
+#   2. teste-la avec : python collect.py --dry-run --only "Nom de la source"
+#
+# tech_only: true  -> la source ne publie que de la tech, on garde tout
+# tech_only: false -> on ne garde que les événements reconnus comme tech
+# ---------------------------------------------------------------------------
+sources:
+  # --- Exemples locaux pour tester le script (ignorés hors --dry-run) ---
+  - name: Exemple iCal
+    url: fixtures/exemple.ics
+    method: ical
+    tech_only: false
+    enabled: true
+
+  - name: Exemple JSON-LD
+    url: fixtures/exemple-jsonld.html
+    method: jsonld
+    tech_only: false
+    enabled: true
+
+  # --- Tes vraies sources : copie ce modèle, remplace l'URL, passe enabled à true ---
+  - name: Modèle calendrier communauté
+    url: https://colle-ici-le-lien-ical.ics
+    method: ical
+    source_type: community      # marketplace | organizer | community | institution
+    scope: city                 # national | regional | city | organizer
+    tech_only: true
+    default_category: data      # ai | data | cloud | cyber | software | devops | product | startup | deeptech | fintech
+    default_city: Paris
+    enabled: false

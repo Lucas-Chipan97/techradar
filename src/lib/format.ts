@@ -45,7 +45,7 @@ export function formatPrice(event: TechEvent) {
     return `${money(event.price_min)} à ${money(event.price_max)}`;
   }
   if (event.price_min != null) return money(event.price_min);
-  return "Payant";
+  return "Prix non communiqué";
 }
 
 export function formatPlace(event: TechEvent) {
