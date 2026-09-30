@@ -35,6 +35,7 @@ class RawEvent:
     price_min: float | None = None
     price_max: float | None = None
     currency: str | None = None
+    keywords: str | None = None    # tags de la source, utilisés pour classer (non affichés)
     raw: dict = field(default_factory=dict, repr=False)
 
 
@@ -218,3 +219,41 @@ def _event_from_node(node: dict, page_url: str) -> RawEvent | None:
         elif ev.is_free is None:
             ev.is_free = False
     return ev
+
+
+# ---------------------------------------------------------------- developers.events
+def parse_devevents(content: bytes | str) -> list[RawEvent]:
+    """Agenda communautaire des conférences développeurs (https://developers.events).
+    Format : liste de {name, date: [début_ms, fin_ms?], hyperlink, city, country, tags}."""
+    data = json.loads(content)
+    events: list[RawEvent] = []
+    for item in data:
+        dates = item.get("date") or []
+        name = (item.get("name") or "").strip()
+        if not name or not dates:
+            continue
+        # les dates sont des jours (minuit UTC) : on affiche 9 h - 18 h, heure de Paris
+        first = datetime.fromtimestamp(dates[0] / 1000, tz=ZoneInfo("UTC")).date()
+        last = datetime.fromtimestamp(dates[-1] / 1000, tz=ZoneInfo("UTC")).date()
+        tags = [t.get("value", "") for t in item.get("tags", []) if t.get("key") in ("tech", "topic")]
+        location = item.get("location") or ""
+        events.append(
+            RawEvent(
+                uid=f"{first.isoformat()}-{name}",
+                title=name,
+                start=datetime.combine(first, time(9, 0), tzinfo=PARIS),
+                end=datetime.combine(last, time(18, 0), tzinfo=PARIS),
+                url=item.get("hyperlink") or None,
+                location=location or None,
+                city=item.get("city") or None,
+                country=item.get("country") or None,
+                attendance="hybrid" if "online" in location.lower() and item.get("city") else None,
+                keywords=" ".join(tags).replace("-", " "),
+                description=(
+                    "Conférence tech" + (f" autour de : {', '.join(t.replace('-', ' ') for t in tags[:5])}." if tags else ".")
+                    + " Données : developers.events (licence CC BY-NC 4.0)."
+                ),
+                raw=item,
+            )
+        )
+    return events

@@ -27,7 +27,7 @@ import yaml
 from dotenv import load_dotenv
 
 import normalize as nz
-from parsers import PARIS, RawEvent, parse_ical, parse_jsonld
+from parsers import PARIS, RawEvent, parse_devevents, parse_ical, parse_jsonld
 from supabase_client import Supabase, SupabaseError
 
 ROOT = Path(__file__).parent
@@ -89,6 +89,8 @@ def fetch(source: Source) -> bytes:
 def extract(source: Source, content: bytes) -> list[RawEvent]:
     if source.method == "ical":
         return parse_ical(content, source.url)
+    if source.method == "devevents":
+        return parse_devevents(content)
     if source.method == "jsonld":
         return parse_jsonld(content.decode("utf-8", errors="replace"), source.url)
     raise ValueError(f"méthode inconnue : {source.method}")
@@ -107,7 +109,8 @@ def to_row(ev: RawEvent, source: Source, now: datetime) -> tuple[dict | None, st
 
     title = nz.clean_text(ev.title, 200) or ev.title
     description = nz.clean_text(ev.description, 3000)
-    category, score = nz.classify(title, description)
+    signals = " ".join(filter(None, [description, ev.keywords]))
+    category, score = nz.classify(title, signals)
     if not category and not source.tech_only:
         return None, "pas tech"
     category = category or source.default_category
@@ -137,8 +140,8 @@ def to_row(ev: RawEvent, source: Source, now: datetime) -> tuple[dict | None, st
         "latitude": ev.latitude,
         "longitude": ev.longitude,
         "primary_category": category,
-        "topics": nz.extract_topics(title, description),
-        "technologies": nz.extract_technologies(title, description),
+        "topics": nz.extract_topics(title, signals),
+        "technologies": nz.extract_technologies(title, signals),
         "is_free": bool(is_free),
         "price_min": 0 if is_free else ev.price_min,
         "price_max": 0 if is_free else ev.price_max,

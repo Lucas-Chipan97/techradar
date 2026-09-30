@@ -12,12 +12,21 @@
 # tech_only: false -> on ne garde que les événements reconnus comme tech
 # ---------------------------------------------------------------------------
 sources:
+  - name: developers.events
+    url: https://developers.events/all-events.json
+    method: devevents
+    source_type: community
+    scope: national
+    tech_only: true
+    default_category: software
+    enabled: true
+
   # --- Exemples locaux pour tester le script (ignorés hors --dry-run) ---
   - name: Exemple iCal
     url: fixtures/exemple.ics
     method: ical
     tech_only: false
-    enabled: true
+    enabled: false
 
   - name: Exemple JSON-LD
     url: fixtures/exemple-jsonld.html
@@ -29,9 +38,9 @@ sources:
   - name: Modèle calendrier communauté
     url: https://colle-ici-le-lien-ical.ics
     method: ical
-    source_type: community      # marketplace | organizer | community | institution
-    scope: city                 # national | regional | city | organizer
+    source_type: community # marketplace | organizer | community | institution
+    scope: city # national | regional | city | organizer
     tech_only: true
-    default_category: data      # ai | data | cloud | cyber | software | devops | product | startup | deeptech | fintech
+    default_category: data # ai | data | cloud | cyber | software | devops | product | startup | deeptech | fintech
     default_city: Paris
     enabled: false
