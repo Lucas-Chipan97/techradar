@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+/* Palette et typographie de la section 11 du dossier projet */
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-ink: #111827;
+  --color-brand: #7c3aed;
+  --color-brand-deep: #5b21b6;
+  --color-brand-soft: #f5f3ff;
+  --color-cloud: #f8f9fc;
+  --color-muted: #6b7280;
+  --color-line: #e5e7eb;
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+
+  --radius-card: 16px;
+  --radius-button: 10px;
+}
+
+@layer base {
+  html {
+    color: var(--color-ink);
+    background: var(--color-cloud);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--color-brand-soft);
+    color: var(--color-brand-deep);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
